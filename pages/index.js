@@ -92,7 +92,7 @@ export default function Dashboard({ usSalesData }) {
         
         let decodedQueryString = decodeURIComponent(queryString);
         // Found last minute issue in production online which would need further investigation - for now we're just treating prod and dev differently
-        decodedQueryString = process.VERCEL_ENV !== 'undefined' ? decodedQueryString.slice(1, -1) : decodedQueryString
+        decodedQueryString = !process.VERCEL_ENV ? decodedQueryString.slice(1, -1) : decodedQueryString
         const charts = JSON.parse(decodedQueryString);
         setCharts(charts);
       }
