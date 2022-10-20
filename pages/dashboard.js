@@ -19,6 +19,7 @@ import lodash from "lodash";
 import Modal from "../components/Modal";
 import ChartEditor from "../components/ChartEditor";
 
+
 const navigation = [
   { name: "Edit charts", href: "#", icon: HomeIcon, current: true },
   { name: "Design & branding", href: "#", icon: UsersIcon, current: false },
@@ -69,12 +70,8 @@ export default function Dashboard({ usSalesData }) {
       } else {
         // parse query string and set charts
         setPublicQueryString(queryString);
-        let strings = decodeURIComponent(queryString)
-        console.log(process.VERCEL_ENV)
-        // Found last minute issue in production online which would need further investigation - for now we're just treating prod and dev differently
-        strings = !process.VERCEL_ENV  ? strings.slice(1, -1) : strings
-        console.log(strings)
-        const charts = JSON.parse(strings);
+        let decodedQueryString = decodeURIComponent(queryString).slice(1, queryString.length -1);
+        const charts = JSON.parse(decodedQueryString.replace('=', '').replace('?', ''));
         setCharts(charts);
       }
     }

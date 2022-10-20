@@ -89,11 +89,8 @@ export default function Dashboard({ usSalesData }) {
         }
       } else {
         // parse query string and set charts
-        
-        let decodedQueryString = decodeURIComponent(queryString);
-        // Found last minute issue in production online which would need further investigation - for now we're just treating prod and dev differently
-        decodedQueryString = !process.VERCEL_ENV ? decodedQueryString.slice(1, -1) : decodedQueryString
-        const charts = JSON.parse(decodedQueryString);
+        let decodedQueryString = decodeURIComponent(queryString).slice(1, queryString.length -1);
+        const charts = JSON.parse(decodedQueryString.replace('=', '').replace('?', ''));
         setCharts(charts);
       }
     }
@@ -239,7 +236,7 @@ export default function Dashboard({ usSalesData }) {
                     key={item.name}
                     href={
                       item.name === "Public Dashboard"
-                        ? `/dashboard/${getQueryString(charts)}`
+                        ? `dashboard/${getQueryString(charts)}`
                         : item.href
                     }
                     className={classNames(
@@ -307,7 +304,7 @@ export default function Dashboard({ usSalesData }) {
                   <button
                     onClick={(e) => {
                       navigator.clipboard.writeText(
-                        `${document.location}/dashboard/${getQueryString(
+                        `${document.location}dashboard/${getQueryString(
                           charts
                         )}`
                       );
