@@ -297,7 +297,7 @@ export default function Dashboard({ usSalesData }) {
                         e.target.innerHTML = "Reset to default";
                       }, 500);
                     }}
-                    className="mr-4 m-4 mb-0 sm:my-0  ml-0 sm:ml-auto mr-8 items-center rounded-md border border-indigo-600 px-4 py-2 text-base font-medium text-indigo-600 shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="mr-4 m-4 mb-0 sm:my-0 ml-0 sm:ml-auto mr-8 items-center rounded-md border border-indigo-600 px-4 py-2 text-base font-medium text-indigo-600 shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
                     Reset to default
                   </button>

@@ -186,7 +186,7 @@ const ChartEditor = ({
             setSelectedChart();
           }}
         >
-          Update
+          Save
         </button>
       </form>
     </div>
