@@ -30,8 +30,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Dashboard() {
-
+export default function Dashboard({ usSalesData }) {
   const [charts, setCharts] = useState([]);
   const [publicQueryString, setPublicQueryString] = useState([]);
 
@@ -69,7 +68,7 @@ export default function Dashboard() {
         setDefaultCharts();
       } else {
         // parse query string and set charts
-        setPublicQueryString(queryString)
+        setPublicQueryString(queryString);
         const strings = decodeURIComponent(queryString).slice(1, -1);
         const charts = JSON.parse(strings);
         console.log(charts);
@@ -93,46 +92,53 @@ export default function Dashboard() {
               </div>
               <div className="mx-auto w-full px-4 sm:px-6 md:px-8">
                 {/* Replace with your content */}
-                <div
-                  className="py-4 flex flex-col lg:flex-row lg:flex-wrap"
-                >
-                                   {charts.map((chart, index) => (
+                <div className="py-4 flex flex-col lg:flex-row lg:flex-wrap">
+                  {charts.map((chart, index) => (
                     <div
+                      key={index}
                       style={{ minWidth: "45%" }}
                       className={`p-6 h-auto relative rounded-lg border-2 border-solid shadow-md m-4 flex flex-col w-full ${
                         chart.type === "pie" ? "lg:w-96" : "lg:w-96"
                       }`}
                     >
                       <div className="flex flex-row justify-between mb-4 mt-0">
-                        <h2 className="text-xl font-bold">
-                          {chart.title}
-                        </h2>
+                        <h2 className="text-xl font-bold">{chart.title}</h2>
                       </div>
                       <div className="flex flex-col justify-center w-full my-auto">
-                      <DataChart
-                        chartData={usSalesData}
-                        dimension={chart.dimension}
-                        title={chart.title}
-                        measure={chart.measure}
-                        field={chart.field}
-                        type={chart.type}
-                      />
-                    </div>
+                        <DataChart
+                          chartData={usSalesData}
+                          dimension={chart.dimension}
+                          title={chart.title}
+                          measure={chart.measure}
+                          field={chart.field}
+                          type={chart.type}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
                 {/* /End replace */}
-                <a className=" p-4 mx-auto underline text-blue-600 block" href={`/${publicQueryString}`}>Admin Dashboard</a>
+                <a
+                  className=" p-4 mx-auto underline text-blue-600 block"
+                  href={`/${publicQueryString}`}
+                >
+                  Admin Dashboard
+                </a>
               </div>
-              
             </div>
-        
           </main>
-         
         </div>
-      
       </div>
-                   
     </>
   );
+}
+
+export async function getStaticProps(context) {
+  // By returning { props: { posts } }, the Blog component
+  // will receive `posts` as a prop at build time
+  return {
+    props: {
+      usSalesData,
+    },
+  };
 }

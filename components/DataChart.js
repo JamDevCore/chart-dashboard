@@ -38,15 +38,13 @@ const DataChart = ({ chartData, field, dimension, measure, title, type }) => {
 
   const getChartType = () => {
     if (type === "bar") {
-      return <Bar data={data} options={options} />;
-    }
-    if (type === "line") {
-      return <Line data={data} options={options} />;
+      return <Bar id={title} data={data} options={options} />;
     }
     if (type === "pie") {
-      return <Pie data={data} options={options} />;
+      return <Pie id={title} data={data} options={options} />;
     }
-    return <Bar data={data} options={options} />;
+    // Bar is default
+    return <Bar id={title} data={data} options={options} />;
   };
 
   return getChartType();

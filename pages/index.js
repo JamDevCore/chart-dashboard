@@ -6,18 +6,24 @@ import {
   UsersIcon,
   Cog6ToothIcon,
   XMarkIcon,
+  FolderArrowDownIcon,
 } from "@heroicons/react/24/outline";
-import usSalesData from "../data/us-sales";
+import usSalesData from "../data/us-sales.js";
 import DataChart from "../components/DataChart";
-import lodash from "lodash";
 import Modal from "../components/Modal";
 import ChartEditor from "../components/ChartEditor";
 import ReactTooltip from "react-tooltip";
+import { saveAs } from "file-saver";
 
 const navigation = [
   { name: "Edit Charts", href: "#", icon: Cog6ToothIcon, current: true },
   { name: "Public Dashboard", href: "#", icon: UsersIcon, current: false },
-  { name: "Design & Brand", href: "javascript:void(0)", icon: PaintBrushIcon, current: false },
+  {
+    name: "Design & Brand",
+    href: "javascript:void(0)",
+    icon: PaintBrushIcon,
+    current: false,
+  },
 ];
 
 function classNames(...classes) {
@@ -28,7 +34,7 @@ const getQueryString = (charts) => {
   return `${"?" + encodeURIComponent(JSON.stringify(charts))}`;
 };
 
-export default function Dashboard() {
+export default function Dashboard({ usSalesData }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [charts, setCharts] = useState([]);
   const [chartModalIsOpen, setChartModalIsOpen] = useState(false);
@@ -38,41 +44,49 @@ export default function Dashboard() {
   const setDefaultCharts = () => {
     setCharts([
       {
-        type: "bar",
+        type: "pie",
         dimension: "region",
-        field: "price",
+        field: "total",
         measure: "sum",
-        title: "Total USD Spend Per Region",
+        title: "Total USD spent per region",
       },
       {
         type: "bar",
         dimension: "category",
         field: "qty_ordered",
         measure: "mean",
-        title: "Average quantity per category",
+        title: "Avg quantity per category",
       },
       {
         type: "pie",
+        dimension: "status",
+        field: "total",
+        measure: "sum",
+        title: "Total spend over order status",
+      },
+      {
+        type: "bar",
         dimension: "state",
         field: "value",
         measure: "mean",
-        title: "Average value per state",
+        title: "Avg value per state",
       },
+
     ]);
   };
-  
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const queryString = document.location.search;
       if (!queryString) {
         // Also check local storage for browser saved charts
         // Would be cool to have a chart loaded (load a set from someone elses share link)
-        const existingCharts = localStorage.getItem('charts');
-        if(existingCharts) {
+        const existingCharts = localStorage.getItem("charts");
+        if (existingCharts) {
           const charts = JSON.parse(existingCharts);
           setCharts(charts);
         } else {
-         setDefaultCharts();
+          setDefaultCharts();
         }
       } else {
         // parse query string and set charts
@@ -81,13 +95,11 @@ export default function Dashboard() {
         setCharts(charts);
       }
     }
-
   }, []);
-  
-  useEffect(() => {
-    localStorage.setItem('charts', JSON.stringify(charts));
-  }, [charts])
 
+  useEffect(() => {
+    localStorage.setItem("charts", JSON.stringify(charts));
+  }, [charts]);
 
   return (
     <>
@@ -156,7 +168,11 @@ export default function Dashboard() {
                       {navigation.map((item) => (
                         <a
                           key={item.name}
-                          data-tip={item.name === "Design & Brand" ? "Coming soon" : null}
+                          data-tip={
+                            item.name === "Design & Brand"
+                              ? "Coming soon"
+                              : null
+                          }
                           href={
                             item.name === "Public Dashboard"
                               ? `/dashboard/${getQueryString(charts)}`
@@ -183,8 +199,11 @@ export default function Dashboard() {
                       ))}
                     </nav>
                   </div>
-                  <div data-tip="Coming soon..."  className="flex flex-shrink-0 bg-gray-700 p-4">
-                  <button className="text-white text-center mx-auto text-sm">
+                  <div
+                    data-tip="Coming soon..."
+                    className="flex flex-shrink-0 bg-gray-700 p-4"
+                  >
+                    <button className="text-white text-center mx-auto text-sm">
                       Dark mode
                     </button>
                   </div>
@@ -212,7 +231,9 @@ export default function Dashboard() {
               <nav className="mt-5 flex-1 space-y-1 px-2">
                 {navigation.map((item) => (
                   <a
-                    data-tip={item.name === "Design & Brand" ? "Coming soon" : null}
+                    data-tip={
+                      item.name === "Design & Brand" ? "Coming soon" : null
+                    }
                     key={item.name}
                     href={
                       item.name === "Public Dashboard"
@@ -240,7 +261,10 @@ export default function Dashboard() {
                 ))}
               </nav>
             </div>
-            <div data-tip="Coming soon..."  className="flex flex-shrink-0 bg-gray-700 p-4">
+            <div
+              data-tip="Coming soon..."
+              className="flex flex-shrink-0 bg-gray-700 p-4"
+            >
               <button className="text-white text-center mx-auto text-sm">
                 Dark mode
               </button>
@@ -260,10 +284,24 @@ export default function Dashboard() {
           </div>
           <main className="flex-1">
             <div className="py-6">
-              <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 inline flex flex-row space-between">
+              <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 inline flex flex-row space-between flex-wrap sm:nowrap">
                 <h1 className="text-2xl font-semibold text-gray-900 px-4">
                   Dashboard
                 </h1>
+                <div className="mr-0 ml-auto">
+                <button
+                  onClick={(e) => {
+                    setDefaultCharts()
+                    setSaveCharts(!saveCharts)
+                    e.target.innerHTML = "Resetting...";
+                    setTimeout(() => {
+                      e.target.innerHTML = "Reset to default";
+                    }, 500);
+                  }}
+                  className="mr-4 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-indigo-600 px-4 py-2 text-base font-medium text-indigo-600 shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Reset to default
+                </button>
                 <button
                   onClick={(e) => {
                     navigator.clipboard.writeText(
@@ -274,10 +312,11 @@ export default function Dashboard() {
                       e.target.innerHTML = "Copy share link";
                     }, 500);
                   }}
-                  className="ml-auto mr-8 items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="ml-0 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Copy share link
                 </button>
+                </div>
               </div>
 
               <div className="mx-auto w-full px-4 sm:px-6 md:px-8">
@@ -301,52 +340,64 @@ export default function Dashboard() {
                   </div>
                   {charts.map((chart, index) => (
                     <div
+                      key={index}
                       style={{ minWidth: "45%" }}
                       className={`p-6 h-auto relative rounded-lg border-2 border-solid shadow-md m-4 flex flex-col w-full ${
                         chart.type === "pie" ? "lg:w-96" : "lg:w-96"
                       }`}
                     >
                       <div className="flex flex-row justify-between mb-4 mt-0">
-                        <h2 className="text-xl font-bold">
-                          {chart.title}
-                        </h2>
-                        <div>
-                      <button
-                        type="button"
-                        className=" ml-auto mr-0 inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 px[0] mx-auto text-base font-medium"
-                        onClick={async () => {
-                          await setSelectedChart(index);
-                          setChartModalIsOpen(true);
-                        }}
-                      >
-                        <Cog6ToothIcon />
-                  
-                      </button>
-                      <button
-                        type="button"
-                        className=" ml-2 mr-0 inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 px[0] mx-auto text-base font-medium"
-                        onClick={async () => {
-                          const newCharts = charts.filter((item, i)  => {
-                            return index !== i
-                        })
-                          setCharts(newCharts)
-                        }}
-                      >
-                        <XMarkIcon />
-                  
-                      </button>
-                      </div>
+                        <h2 className="text-xl font-bold">{chart.title}</h2>
+                        <div className="px-0 mx-0">
+                          {/* Turn these into a drop down menu next */}
+                          <button
+                            type="button"
+                            className="inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 text-base font-medium"
+                            onClick={async () => {
+                              await setSelectedChart(index);
+                              setChartModalIsOpen(true);
+                            }}
+                          >
+                            <Cog6ToothIcon />
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 text-base font-medium"
+                            onClick={async () => {
+                              const canvasSave = document.getElementById(
+                                chart.title
+                              );
+                              canvasSave.toBlob(function (blob) {
+                                saveAs(blob, chart.title);
+                              });
+                            }}
+                          >
+                            <FolderArrowDownIcon />
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 text-base font-medium"
+                            onClick={async () => {
+                              const newCharts = charts.filter((item, i) => {
+                                return index !== i;
+                              });
+                              setCharts(newCharts);
+                            }}
+                          >
+                            <XMarkIcon />
+                          </button>
+                        </div>
                       </div>
                       <div className="flex flex-col justify-center w-full my-auto">
-                      <DataChart
-                        chartData={usSalesData}
-                        dimension={chart.dimension}
-                        title={chart.title}
-                        measure={chart.measure}
-                        field={chart.field}
-                        type={chart.type}
-                      />
-                    </div>
+                        <DataChart
+                          chartData={usSalesData}
+                          dimension={chart.dimension}
+                          title={chart.title}
+                          measure={chart.measure}
+                          field={chart.field}
+                          type={chart.type}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -398,7 +449,17 @@ export default function Dashboard() {
           />
         </Modal>
       )}
-      <ReactTooltip backgroundColor="black" textColor="white"/>
+      <ReactTooltip backgroundColor="black" textColor="white" />
     </>
   );
+}
+
+export async function getStaticProps(context) {
+  // By returning { props: { posts } }, the Blog component
+  // will receive `posts` as a prop at build time
+  return {
+    props: {
+      usSalesData,
+    },
+  };
 }
