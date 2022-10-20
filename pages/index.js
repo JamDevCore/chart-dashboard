@@ -1,63 +1,103 @@
-import { Fragment, useEffect, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { Fragment, useEffect, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
-  CalendarIcon,
-  ChartBarIcon,
-  FolderIcon,
-  HomeIcon,
-  InboxIcon,
+  PaintBrushIcon,
   UsersIcon,
+  Cog6ToothIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline'
-import usSalesData from '../data/us-sales';
-import DataChart from '../components/DataChart';
-import lodash from 'lodash';
-import Modal from '../components/Modal'
+} from "@heroicons/react/24/outline";
+import usSalesData from "../data/us-sales";
+import DataChart from "../components/DataChart";
+import lodash from "lodash";
+import Modal from "../components/Modal";
+import ChartEditor from "../components/ChartEditor";
+import ReactTooltip from "react-tooltip";
 
 const navigation = [
-  { name: 'Edit charts', href: '#', icon: HomeIcon, current: true },
-  { name: 'Design & branding', href: '#', icon: UsersIcon, current: false },
-  { name: 'Preview', href: '#', icon: FolderIcon, current: false },
-  { name: 'Share setting', href: '#', icon: CalendarIcon, current: false },
-]
+  { name: "Edit Charts", href: "#", icon: Cog6ToothIcon, current: true },
+  { name: "Public Dashboard", href: "#", icon: UsersIcon, current: false },
+  { name: "Design & Brand", href: "javascript:void(0)", icon: PaintBrushIcon, current: false },
+];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
+const getQueryString = (charts) => {
+  return `${"?" + encodeURIComponent(JSON.stringify(charts))}`;
+};
+
 export default function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [charts, setCharts] = useState([])
-  const [selectedChart, setSelectedChart] = useState({})
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [charts, setCharts] = useState([]);
+  const [chartModalIsOpen, setChartModalIsOpen] = useState(false);
+  const [selectedChart, setSelectedChart] = useState();
+  const [saveCharts, setSaveCharts] = useState(false);
 
   const setDefaultCharts = () => {
     setCharts([
-        { type: 'bar', dimension: 'state', field: 'price', measure: 'sum', title: 'Total USD Spend Per State', id: 1, },
-        { type: 'pie', dimension: 'category', field: 'total', measure: 'mean', title: 'Average quantity per category', id:2, },
-        { type: 'pie', dimension: 'region', field: 'value', measure: 'mean', title: 'Average value per region', id: 3, },
-    ])
-  }
-
+      {
+        type: "bar",
+        dimension: "region",
+        field: "price",
+        measure: "sum",
+        title: "Total USD Spend Per Region",
+      },
+      {
+        type: "bar",
+        dimension: "category",
+        field: "qty_ordered",
+        measure: "mean",
+        title: "Average quantity per category",
+      },
+      {
+        type: "pie",
+        dimension: "state",
+        field: "value",
+        measure: "mean",
+        title: "Average value per state",
+      },
+    ]);
+  };
+  
   useEffect(() => {
-    if(typeof window !== 'undefined') {
-        const queryString = document.location.search;
-        console.log(queryString);
-        if(!queryString) {
-            // Also check local storage for browser saved charts 
-            setDefaultCharts()
+    if (typeof window !== "undefined") {
+      const queryString = document.location.search;
+      if (!queryString) {
+        // Also check local storage for browser saved charts
+        // Would be cool to have a chart loaded (load a set from someone elses share link)
+        const existingCharts = localStorage.getItem('charts');
+        if(existingCharts) {
+          const charts = JSON.parse(existingCharts);
+          setCharts(charts);
         } else {
-            // USE query string to create charts - charts don't need to be 'saved' but can be accessed via a shareable link
+         setDefaultCharts();
         }
+      } else {
+        // parse query string and set charts
+        const decodedQueryString = decodeURIComponent(queryString).slice(1, -1);
+        const charts = JSON.parse(decodedQueryString);
+        setCharts(charts);
+      }
     }
-  }, [])
+
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem('charts', JSON.stringify(charts));
+  }, [charts])
 
 
   return (
     <>
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
-          <Dialog as="div" className="relative z-40 md:hidden" onClose={setSidebarOpen}>
+          <Dialog
+            as="div"
+            className="relative z-40 md:hidden"
+            onClose={setSidebarOpen}
+          >
             <Transition.Child
               as={Fragment}
               enter="transition-opacity ease-linear duration-300"
@@ -97,7 +137,10 @@ export default function Dashboard() {
                         onClick={() => setSidebarOpen(false)}
                       >
                         <span className="sr-only">Close sidebar</span>
-                        <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                        <XMarkIcon
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
                       </button>
                     </div>
                   </Transition.Child>
@@ -113,18 +156,25 @@ export default function Dashboard() {
                       {navigation.map((item) => (
                         <a
                           key={item.name}
-                          href={item.href}
+                          data-tip={item.name === "Design & Brand" ? "Coming soon" : null}
+                          href={
+                            item.name === "Public Dashboard"
+                              ? `/dashboard/${getQueryString(charts)}`
+                              : item.href
+                          }
                           className={classNames(
                             item.current
-                              ? 'bg-gray-900 text-white'
-                              : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                            'group flex items-center px-2 py-2 text-base font-medium rounded-md'
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                           )}
                         >
                           <item.icon
                             className={classNames(
-                              item.current ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300',
-                              'mr-4 flex-shrink-0 h-6 w-6'
+                              item.current
+                                ? "text-gray-300"
+                                : "text-gray-400 group-hover:text-gray-300",
+                              "mr-4 flex-shrink-0 h-6 w-6"
                             )}
                             aria-hidden="true"
                           />
@@ -133,14 +183,16 @@ export default function Dashboard() {
                       ))}
                     </nav>
                   </div>
-                  <div className="flex flex-shrink-0 bg-gray-700 p-4">
-                    <button href="#" className="group block flex-shrink-0">
-                        <p>Light mode</p>
+                  <div data-tip="Coming soon..."  className="flex flex-shrink-0 bg-gray-700 p-4">
+                  <button className="text-white text-center mx-auto text-sm">
+                      Dark mode
                     </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
-              <div className="w-14 flex-shrink-0">{/* Force sidebar to shrink to fit close icon */}</div>
+              <div className="w-14 flex-shrink-0">
+                {/* Force sidebar to shrink to fit close icon */}
+              </div>
             </div>
           </Dialog>
         </Transition.Root>
@@ -160,17 +212,26 @@ export default function Dashboard() {
               <nav className="mt-5 flex-1 space-y-1 px-2">
                 {navigation.map((item) => (
                   <a
+                    data-tip={item.name === "Design & Brand" ? "Coming soon" : null}
                     key={item.name}
-                    href={item.href}
+                    href={
+                      item.name === "Public Dashboard"
+                        ? `/dashboard/${getQueryString(charts)}`
+                        : item.href
+                    }
                     className={classNames(
-                      item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                      'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                      item.current
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                     )}
                   >
                     <item.icon
                       className={classNames(
-                        item.current ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300',
-                        'mr-3 flex-shrink-0 h-6 w-6'
+                        item.current
+                          ? "text-gray-300"
+                          : "text-gray-400 group-hover:text-gray-300",
+                        "mr-3 flex-shrink-0 h-6 w-6"
                       )}
                       aria-hidden="true"
                     />
@@ -179,8 +240,10 @@ export default function Dashboard() {
                 ))}
               </nav>
             </div>
-            <div className="flex flex-shrink-0 bg-gray-700 p-4">
-             <button className="text-white text-center mx-auto text-sm">Light mode</button>
+            <div data-tip="Coming soon..."  className="flex flex-shrink-0 bg-gray-700 p-4">
+              <button className="text-white text-center mx-auto text-sm">
+                Dark mode
+              </button>
             </div>
           </div>
         </div>
@@ -197,24 +260,95 @@ export default function Dashboard() {
           </div>
           <main className="flex-1">
             <div className="py-6">
-              <div className="mx-auto mw-full px-4 sm:px-6 lg:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900 px-4">Dashboard</h1>
+              <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 inline flex flex-row space-between">
+                <h1 className="text-2xl font-semibold text-gray-900 px-4">
+                  Dashboard
+                </h1>
+                <button
+                  onClick={(e) => {
+                    navigator.clipboard.writeText(
+                      `${document.location}/dashboard/${getQueryString(charts)}`
+                    );
+                    e.target.innerHTML = "Copied...";
+                    setTimeout(() => {
+                      e.target.innerHTML = "Copy share link";
+                    }, 500);
+                  }}
+                  className="ml-auto mr-8 items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Copy share link
+                </button>
               </div>
+
               <div className="mx-auto w-full px-4 sm:px-6 md:px-8">
                 {/* Replace with your content */}
-                <div className="py-4 flex flex-wrap ">
-                  <div className="h-96 w-96 rounded-lg border-4 border-dashed border-gray-200 m-4 flex flex-col justify-center">
-                    <button className="mx-auto" onClick={() => {
-                        setNewChartModal(true);
-                    }}>
-            
-                         <p className='text-gray-400'>Create new chart +</p>
+                <div
+                  className=" flex flex-col lg:flex-row lg:flex-wrap"
+                  key={saveCharts}
+                >
+                  <div
+                    style={{ minWidth: "45%" }}
+                    className="h-auto w-full p-6 lg:w-96 rounded-lg border-2 border-dashed border-gray-200 m-4 flex flex-col justify-center"
+                  >
+                    <button
+                      className="mx-auto"
+                      onClick={() => {
+                        setChartModalIsOpen(true);
+                      }}
+                    >
+                      <p className="text-gray-400">Create new chart +</p>
                     </button>
+                  </div>
+                  {charts.map((chart, index) => (
+                    <div
+                      style={{ minWidth: "45%" }}
+                      className={`p-6 h-auto relative rounded-lg border-2 border-solid shadow-md m-4 flex flex-col w-full ${
+                        chart.type === "pie" ? "lg:w-96" : "lg:w-96"
+                      }`}
+                    >
+                      <div className="flex flex-row justify-between mb-4 mt-0">
+                        <h2 className="text-xl font-bold">
+                          {chart.title}
+                        </h2>
+                        <div>
+                      <button
+                        type="button"
+                        className=" ml-auto mr-0 inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 px[0] mx-auto text-base font-medium"
+                        onClick={async () => {
+                          await setSelectedChart(index);
+                          setChartModalIsOpen(true);
+                        }}
+                      >
+                        <Cog6ToothIcon />
+                  
+                      </button>
+                      <button
+                        type="button"
+                        className=" ml-2 mr-0 inline-flex w-6 items-center rounded-md border border-transparent text-gray-800 px[0] mx-auto text-base font-medium"
+                        onClick={async () => {
+                          const newCharts = charts.filter((item, i)  => {
+                            return index !== i
+                        })
+                          setCharts(newCharts)
+                        }}
+                      >
+                        <XMarkIcon />
+                  
+                      </button>
+                      </div>
+                      </div>
+                      <div className="flex flex-col justify-center w-full my-auto">
+                      <DataChart
+                        chartData={usSalesData}
+                        dimension={chart.dimension}
+                        title={chart.title}
+                        measure={chart.measure}
+                        field={chart.field}
+                        type={chart.type}
+                      />
                     </div>
-                  {charts.map(chart => 
-                  <div className="p-8 h-96 w-96 rounded-lg border-4 border-solid border-gray-200 m-4 flex flex-col justify-center">
-                  <DataChart chartData={usSalesData} dimension={chart.dimension} title={chart.title} measure={chart.measure} field={chart.field} type={chart.type} />
-                  </div>)}
+                    </div>
+                  ))}
                 </div>
                 {/* /End replace */}
               </div>
@@ -222,7 +356,49 @@ export default function Dashboard() {
           </main>
         </div>
       </div>
-      {/* <Modal /> */}
+      {chartModalIsOpen && (
+        <Modal
+          setChartModalIsOpen={setChartModalIsOpen}
+          chartModalIsOpen={chartModalIsOpen}
+        >
+          <ChartEditor
+            setChartModalIsOpen={setChartModalIsOpen}
+            chartData={usSalesData}
+            title={
+              typeof selectedChart === "number"
+                ? charts[selectedChart].title
+                : ""
+            }
+            measure={
+              typeof selectedChart === "number"
+                ? charts[selectedChart].measure
+                : ""
+            }
+            dimension={
+              typeof selectedChart === "number"
+                ? charts[selectedChart].dimension
+                : ""
+            }
+            field={
+              typeof selectedChart === "number"
+                ? charts[selectedChart].field
+                : ""
+            }
+            type={
+              typeof selectedChart === "number"
+                ? charts[selectedChart].type
+                : ""
+            }
+            setCharts={setCharts}
+            charts={charts}
+            id={selectedChart}
+            setSaveCharts={setSaveCharts}
+            saveCharts={saveCharts}
+            setSelectedChart={setSelectedChart}
+          />
+        </Modal>
+      )}
+      <ReactTooltip backgroundColor="black" textColor="white"/>
     </>
-  )
+  );
 }
