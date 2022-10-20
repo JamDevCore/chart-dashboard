@@ -33,7 +33,7 @@ function classNames(...classes) {
 
 export default function Dashboard({ usSalesData }) {
   const [charts, setCharts] = useState([]);
-  const [publicQueryString, setPublicQueryString] = useState([]);
+  const [publicQueryString, setPublicQueryString] = useState();
 
   const setDefaultCharts = () => {
     setCharts([

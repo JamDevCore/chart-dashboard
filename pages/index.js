@@ -304,9 +304,7 @@ export default function Dashboard({ usSalesData }) {
                   <button
                     onClick={(e) => {
                       navigator.clipboard.writeText(
-                        `${document.location}dashboard/${getQueryString(
-                          charts
-                        )}`
+                        `${document.location.origin}/dashboard${getQueryString(charts)}`
                       );
                       e.target.innerHTML = "Copied...";
                       setTimeout(() => {
