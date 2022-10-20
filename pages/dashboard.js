@@ -86,9 +86,15 @@ export default function Dashboard({ usSalesData }) {
           <main className="flex-1">
             <div className="py-6 mx-auto">
               <div className="mx-auto mw-full px-4 sm:px-6 lg:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900 px-4">
+                <h1 className="text-4xl font-semibold text-gray-900 px-4">
                   Dashboard
                 </h1>
+                <a
+                  className=" p-4 mx-auto underline text-blue-600 block"
+                  href={`/${publicQueryString}`}
+                >
+                  Admin Dashboard
+                </a>
               </div>
               <div className="mx-auto w-full px-4 sm:px-6 md:px-8">
                 {/* Replace with your content */}
@@ -118,12 +124,7 @@ export default function Dashboard({ usSalesData }) {
                   ))}
                 </div>
                 {/* /End replace */}
-                <a
-                  className=" p-4 mx-auto underline text-blue-600 block"
-                  href={`/${publicQueryString}`}
-                >
-                  Admin Dashboard
-                </a>
+     
               </div>
             </div>
           </main>
