@@ -71,7 +71,6 @@ export default function Dashboard({ usSalesData }) {
         measure: "mean",
         title: "Avg value per state",
       },
-
     ]);
   };
 
@@ -289,33 +288,35 @@ export default function Dashboard({ usSalesData }) {
                   Dashboard
                 </h1>
                 <div className="mr-0 ml-auto">
-                <button
-                  onClick={(e) => {
-                    setDefaultCharts()
-                    setSaveCharts(!saveCharts)
-                    e.target.innerHTML = "Resetting...";
-                    setTimeout(() => {
-                      e.target.innerHTML = "Reset to default";
-                    }, 500);
-                  }}
-                  className="mr-4 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-indigo-600 px-4 py-2 text-base font-medium text-indigo-600 shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                  Reset to default
-                </button>
-                <button
-                  onClick={(e) => {
-                    navigator.clipboard.writeText(
-                      `${document.location}/dashboard/${getQueryString(charts)}`
-                    );
-                    e.target.innerHTML = "Copied...";
-                    setTimeout(() => {
-                      e.target.innerHTML = "Copy share link";
-                    }, 500);
-                  }}
-                  className="ml-0 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                  Copy share link
-                </button>
+                  <button
+                    onClick={(e) => {
+                      setDefaultCharts();
+                      setSaveCharts(!saveCharts);
+                      e.target.innerHTML = "Resetting...";
+                      setTimeout(() => {
+                        e.target.innerHTML = "Reset to default";
+                      }, 500);
+                    }}
+                    className="mr-4 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-indigo-600 px-4 py-2 text-base font-medium text-indigo-600 shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    Reset to default
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      navigator.clipboard.writeText(
+                        `${document.location}/dashboard/${getQueryString(
+                          charts
+                        )}`
+                      );
+                      e.target.innerHTML = "Copied...";
+                      setTimeout(() => {
+                        e.target.innerHTML = "Copy share link";
+                      }, 500);
+                    }}
+                    className="ml-0 m-4 sm:my-0 sm:ml-auto mr-8 items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    Copy share link
+                  </button>
                 </div>
               </div>
 
